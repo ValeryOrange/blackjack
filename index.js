@@ -12,14 +12,32 @@ const chalk = require('chalk');
 // внутренние модули
 const Game = require('./Game');
 const Deck = require('./SetDeck');
+const Player = require('./Player');
 
-
-// создается новый игровой цикл
+// создается новая игра
 const newGame = new Game(Deck);
 
-const userName = newGame.setUserName();
-console.log('Agent Smith is dealer.');
+const createNewUser = () => {
+  return new Promise((resolve, reject) => {
+    resolve();
+  });
+};
 
-newGame.firstDealing();
+const gameLogic = async () => {
+  try {
+    const userName = await createNewUser(newGame.setUserName);
+    const dealer = new Player('Agent Smith', 'dealer');
+    const user = new Player(userName, 'user');
+    const players = [dealer,user];
+    console.log('Agent Smith is dealer.');
+    newGame.firstDealing(players);
+  } catch (e) {
+    console.error(e.message);
+  }
+}
+
+gameLogic();
+
+
 
 

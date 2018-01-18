@@ -11,7 +11,7 @@ const chalk = require('chalk');
 
 // внутренние модули
 const readline = require('readline');
-const Player = require('./Player');
+
 
 // число карт каждому игроку во время первой раздачи
 const FIRST_NUMBER = 2;
@@ -40,15 +40,10 @@ module.exports = class Game {
 
     rl.question('What is your name?\n', (answer) => {
       name = answer && answer !== ' ' ? answer : 'Mr. Anderson';
-      this.createPlayers(name);
       rl.close();
     });
 
     return name;
-  }
-
-  createPlayers(name) {
-    this.players = [new Player('Agent Smith', 'dealer'), new Player(name, 'user')];
   }
 
   /**
@@ -68,9 +63,8 @@ module.exports = class Game {
     в node.js нет деструктуризаци?
   */
 
-  dealCard() {
-    let {players} = this;
-    let i = players.length - 1;
+  dealCard(players) {
+    let i = players.length;
     for (i;i--;) {
       let card = this.getCard()
       players[i].addPoints(card);
@@ -86,10 +80,9 @@ module.exports = class Game {
   * @param {Array} массив игроков
   * @description при первой раздаче раздает каждому игру несколько карт
   */
-  firstDealing() {
-    let {players} = this;
-    let k = FIRST_NUMBER - 1;
-    for (k;k--;) {
+  firstDealing(players) {
+    let i = FIRST_NUMBER;
+    for (i;i--;) {
       this.dealCard(players);
     }
   }
