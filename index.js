@@ -13,24 +13,26 @@ const chalk = require('chalk');
 const Game = require('./Game');
 const Deck = require('./SetDeck');
 const Player = require('./Player');
+const blockBreak = require('./BlockBreak');
 
 // создается новая игра
 const newGame = new Game(Deck);
 
-const createNewUser = () => {
-  return new Promise((resolve, reject) => {
-    resolve();
-  });
-};
-
+/**
+* @description асинхронная функция, описывающая логику игры
+*/
 const gameLogic = async () => {
   try {
-    const userName = await createNewUser(newGame.setUserName);
+    const userName = await newGame.setUserName();
+    blockBreak();
+    console.log(`Hello, ${userName}`);
     const dealer = new Player('Agent Smith', 'dealer');
     const user = new Player(userName, 'user');
-    const players = [dealer,user];
     console.log('Agent Smith is dealer.');
+    blockBreak();
+    const players = [dealer,user];
     newGame.firstDealing(players);
+    newGame.checkWinner(players);
   } catch (e) {
     console.error(e.message);
   }

@@ -13,11 +13,11 @@ module.exports = class Player {
   constructor(name, type) {
     this.name = name;
     this.type = type;
-    this.scrore = 0;
+    this.score = 0;
     this.cardNumber = 0;
   }
 
   addPoints(num) {
-    this.scrore += num;
+    this.score += num;
   }
 }

@@ -11,6 +11,7 @@ const chalk = require('chalk');
 
 // внутренние модули
 const readline = require('readline');
+const blockBreak = require('./BlockBreak');
 
 
 // число карт каждому игроку во время первой раздачи
@@ -21,7 +22,7 @@ module.exports = class Game {
   * @param {Array} deck колода карт
   */
   constructor(deck) {
-    this.isWinner = false;
+    this.winner = '';
     this.deck = deck;
   }
 
@@ -30,20 +31,26 @@ module.exports = class Game {
   * @return {String} имя пользователя
   */
   setUserName() {
-    let name = '';
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
+    return new Promise((resolve, reject) => {
+      let name = '';
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      console.log("Hello! Welcome to our blackjack casino! Let's see how deep the rabbit-hole goes.");
+      blockBreak();
+
+      rl.question('What is your name?\n', (answer) => {
+        if (answer && answer !== ' ') {
+          name = answer;
+          resolve(name);
+        } else {
+          resolve('Mr. Anderson');
+        }
+        rl.close();
+      });
     });
-
-    console.log("Hello! Welcome to our blackjack casino! Let's see how deep the rabbit-hole goes.");
-
-    rl.question('What is your name?\n', (answer) => {
-      name = answer && answer !== ' ' ? answer : 'Mr. Anderson';
-      rl.close();
-    });
-
-    return name;
   }
 
   /**
@@ -65,15 +72,16 @@ module.exports = class Game {
 
   dealCard(players) {
     let i = players.length;
-    for (i;i--;) {
-      let card = this.getCard()
-      players[i].addPoints(card);
-      if (card === 11 && players[i].score >= 21) {
-        players[i].addPoints(-10);
+
+    players.map((item) => {
+      let card = this.getCard();
+      item.addPoints(card);
+      if (card === 11 && item.score >= 21) {
+        item.addPoints(-10);
       }
-      console.log(`${players[i].name} has ${players[i].score} points`);
-      players[i].cardNumber++;
-    }
+      console.log(`${item.name} has ${item.score} points`);
+      item.cardNumber++;
+    });
   }
 
   /**
@@ -81,9 +89,25 @@ module.exports = class Game {
   * @description при первой раздаче раздает каждому игру несколько карт
   */
   firstDealing(players) {
+    console.log('There is the first dealing!\n');
     let i = FIRST_NUMBER;
     for (i;i--;) {
       this.dealCard(players);
     }
+  }
+
+  checkWinner(players) {
+    players.map((item) => {
+      if (item.score === 21) {
+        this.winner = !this.winner ? item.name : 'tie score';
+      }
+    });
+    
+    if (this.winner) {
+      console.log(`The winner is: ${this.winner}`);
+    } else {
+      console.log('The game goes on!');
+    }
+    blockBreak();
   }
 };
