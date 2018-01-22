@@ -16,6 +16,8 @@ const blockBreak = require('./BlockBreak');
 
 // число карт каждому игроку во время первой раздачи
 const FIRST_NUMBER = 2;
+const BLACKJACK = 21;
+const STOP_SCORE = 17;
 
 module.exports = class Game {
   /**
@@ -67,47 +69,57 @@ module.exports = class Game {
   * @param {Array} массив игроков
   * @description выдает игроку одну карту
                  если счет больше 21 и выпал туз, то его вес 11 очков
-    в node.js нет деструктуризаци?
   */
-
-  dealCard(players) {
-    let i = players.length;
-
-    players.map((item) => {
-      let card = this.getCard();
-      item.addPoints(card);
-      if (card === 11 && item.score >= 21) {
-        item.addPoints(-10);
-      }
-      console.log(`${item.name} has ${item.score} points`);
-      item.cardNumber++;
-    });
+  dealCard(player) {
+    let card = this.getCard();
+    player.addPoints(card);
+    if (card === 11 && player.score >= BLACKJACK) {
+      player.addPoints(-10);
+    }
+    player.cardNumber++;
   }
 
   /**
   * @param {Array} массив игроков
   * @description при первой раздаче раздает каждому игру несколько карт
   */
-  firstDealing(players) {
+  firstDealing(players, len) {
     console.log('There is the first dealing!\n');
-    let i = FIRST_NUMBER;
-    for (i;i--;) {
-      this.dealCard(players);
+    let i = len;
+    
+    // важен порядок обработки элементов массива, поэтому for с обратным отсчетом
+    for (i;i >= 0;i--) {
+      for (let k = FIRST_NUMBER;k--;) {
+        this.dealCard(players[i]);
+      }
+      console.log(`${players[i].name} has ${players[i].score} points`);
     }
   }
 
-  checkWinner(players) {
+  checkBlackjack(players) {
     players.map((item) => {
-      if (item.score === 21) {
-        this.winner = !this.winner ? item.name : 'tie score';
+      if (item.score === BLACKJACK) {
+        this.winner = !this.winner ? item.name : 'standoff';
       }
     });
-    
-    if (this.winner) {
-      console.log(`The winner is: ${this.winner}`);
-    } else {
-      console.log('The game goes on!');
+  }
+
+  checkIfUserLose(user, dealer) {
+    if (user.score > BLACKJACK) {
+      this.winner = dealer.name;
+      console.log('It busts. Sorry!\n');
+      return true;
     }
-    blockBreak();
+  }
+
+  checkFinalScore(user, dealer) {
+    if (user.type === 'user') {
+      if (user.score > 21 && dealer.score > 21) {
+        this.winner = 'standoff';
+      } else if ((user.score > dealer.score && user.score <= 21) ||
+                 (dealer.score > 21 && user.score < dealer.score)) {
+        this.winner = user.name;
+      } else this.winner = dealer.name;
+    } else return;
   }
 };
